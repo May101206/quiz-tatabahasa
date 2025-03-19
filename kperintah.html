@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kuiz Pilihan Ganda</title>
+  <style>
+    body {
+      background-color: #94ccd4;
+      color: #193f56;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background-color: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+    }
+    .question {
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+    .options button {
+      display: block;
+      width: 100%;
+      background-color: #ffd864;
+      color: #193f56;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .options button:hover {
+      background-color: #ffa114;
+      color: white;
+    }
+    .stats {
+      margin-top: 1rem;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    .end-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+    .end-screen h2 {
+      color: #ffa114;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="quiz-screen">
+      <div class="question">Soalan akan dipaparkan di sini</div>
+      <div class="options"></div>
+      <div class="stats">
+        <p>Purata Masa Reaksi: <span id="avgTime">0</span> saat</p>
+        <p>Jawapan betul berturut-turut: <span id="streak">0</span></p>
+        <p>Kadar ketepatan: <span id="accuracy">0%</span></p>
+      </div>
+    </div>
+    <div class="end-screen">
+      <h2>Kuiz Tamat!</h2>
+      <p>Terima kasih.</p>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        question: '"Aniq, ______ ambil tisu itu kepada saya." kata kakak kepada Aniq.',
+        options: ["jangan", "sila", "minta", "tolong"],
+        answer: 3
+      },
+
+      {
+        question: '"Baik, semua murid ______ duduk di tempat masing-masing, cikgu ingin mengira bilangan murid yang hadir kelas tambahan ini."',
+        options: ["tolong", "minta", "sila", "jemput"],
+        answer: 2
+      },
+      {
+        question: '"______ masuk Jia Yan, saya sudah menyediakan juadah yang lazat untuk kamu." kata Diana kepada Jia Yan."',
+        options: ["Jemput", "Sila", "Tolong", "Minta"],
+        answer: 0
+      },
+      {
+        question: '"______ semua murid senyap kerana peperiksaan sedang dijalankan." pengumuman pengetua kepada semua murid."',
+        options: ["Tolong", "Minta", "Sila", "Usah"],
+        answer: 1
+      },
+      {
+        question: '"______lah menjaga kebersihan di tempat awam. Perbuatan kamu ini boleh menjejaskan imej komuniti ini." nasihat pengawas kepada budak nakal itu."',
+        options: ["Jangan", "Tolong", "Usah", "Sila"],
+        answer: 1
+      },
+
+
+      {
+        question: '"______lah kita sesekali cuba membuat jenayah kerana hukuman yang setimpal akan dijatuhkan kepada pesalah yabg melakukan jenayah."',
+        options: ["Jangan", "Usah", "Minta", "Jemput"],
+        answer: 0
+      },
+
+      {
+        question: '"______ sentiasa sibuk dengan kerja sekolah kamu, rehatlah sekejap." kata mak Airul kepada anaknya."',
+        options: ["Tolong", "Jangan", "Sila", "Usah"],
+        answer: 1
+      },
+
+      {
+        question: '"Apabila kita berdepan dengan penyaksi yang ramai, ______ berasa segan, jadikan diri yang berani."',
+        options: [ "Jangan", "Usah", "Minta","Tolong"],
+        answer: 1
+      },
+
+
+
+    ];
+
+    let usedQuestions = [];
+    let correctStreak = 0;
+    let totalCorrect = 0;
+    let totalAnswered = 0;
+    let totalTime = 0;
+    let startTime;
+
+    const questionDiv = document.querySelector('.question');
+    const optionsDiv = document.querySelector('.options');
+    const avgTimeSpan = document.getElementById('avgTime');
+    const streakSpan = document.getElementById('streak');
+    const accuracySpan = document.getElementById('accuracy');
+    const endScreen = document.querySelector('.end-screen');
+    const quizScreen = document.querySelector('.quiz-screen');
+
+    function showQuestion() {
+      if (usedQuestions.length === 10 || usedQuestions.length === questions.length) {
+        endScreen.style.display = 'flex';
+        quizScreen.style.display = 'none';
+        return;
+      }
+
+      let index;
+      do {
+        index = Math.floor(Math.random() * questions.length);
+      } while (usedQuestions.includes(index));
+
+      usedQuestions.push(index);
+
+      const q = questions[index];
+      questionDiv.textContent = q.question;
+      optionsDiv.innerHTML = "";
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.textContent = opt;
+        btn.onclick = () => selectAnswer(i, q.answer);
+        optionsDiv.appendChild(btn);
+      });
+      startTime = Date.now();
+    }
+
+    function selectAnswer(selected, correct) {
+      const endTime = Date.now();
+      const reactionTime = (endTime - startTime) / 1000;
+      totalTime += reactionTime;
+      totalAnswered++;
+
+      if (selected === correct) {
+        correctStreak++;
+        totalCorrect++;
+      } else {
+        correctStreak = 0;
+      }
+
+      updateStats();
+      setTimeout(showQuestion, 500);
+    }
+
+    function updateStats() {
+      avgTimeSpan.textContent = (totalTime / totalAnswered).toFixed(2);
+      streakSpan.textContent = correctStreak;
+      accuracySpan.textContent = ((totalCorrect / totalAnswered) * 100).toFixed(0) + "%";
+    }
+
+    showQuestion();
+  </script>
+</body>
+</html>
